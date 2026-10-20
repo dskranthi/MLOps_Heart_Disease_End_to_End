@@ -1,0 +1,14 @@
+{
+  "selected_run": "logreg_C0.1",
+  "selected_params": {
+    "model": "LogisticRegression",
+    "C": 0.1
+  },
+  "cv_roc_auc": 0.9027904462687071,
+  "test_accuracy": 0.8852459016393442,
+  "test_precision": 0.8387096774193549,
+  "test_recall": 0.9285714285714286,
+  "test_roc_auc": 0.9653679653679654,
+  "n_train": 242,
+  "n_test": 61
+}

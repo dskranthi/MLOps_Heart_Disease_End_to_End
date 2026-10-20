@@ -1,0 +1,8 @@
+line-length = 110
+target-version = "py311"
+extend-exclude = ["*.ipynb"]
+
+[lint.per-file-ignores]
+"src/train.py" = ["E402"]
+"scripts/*.py" = ["E402"]
+"tests/*.py" = ["E402"]

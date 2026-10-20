@@ -1,0 +1,50 @@
+# API + Prometheus + Grafana + MLflow:   docker compose up --build
+# Train inside Docker and log to the MLflow server:  docker compose --profile train run --rm train
+services:
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
+    ports: ["5001:5000"]          # MLflow UI on http://localhost:5001 (5000 is often taken)
+    volumes:
+      - mlflow_store:/mlflow
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+  train:
+    profiles: ["train"]
+    build:
+      context: .
+      dockerfile: Dockerfile.train
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - ./model:/app/model
+      - ./artifacts:/app/artifacts
+      - ./data:/app/data
+    depends_on:
+      mlflow:
+        condition: service_healthy
+  api:
+    build: .
+    ports: ["8000:8000"]
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+    depends_on: [api]
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./monitoring/grafana-datasource.yml:/etc/grafana/provisioning/datasources/ds.yml:ro
+    ports: ["3000:3000"]
+    depends_on: [prometheus]
+
+volumes:
+  mlflow_store:
